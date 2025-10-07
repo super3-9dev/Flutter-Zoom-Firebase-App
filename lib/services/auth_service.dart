@@ -27,7 +27,9 @@ class AuthService {
     }
   }
   
-  static GoogleSignIn? get _googleSignIn => kIsWeb ? null : GoogleSignIn(scopes: ['email']);
+  static GoogleSignIn? get _googleSignIn => kIsWeb ? null : GoogleSignIn(
+    scopes: ['openid', 'profile', 'email'],
+  );
 
   /// Get current user
   static User? get currentUser => _auth?.currentUser;
@@ -49,10 +51,10 @@ class AuthService {
       try {
         debugPrint('Starting Google Sign-In for web...');
         
-        // For web, we need to use Google Sign-In web implementation
+        // Use the web client ID from Firebase configuration
         final GoogleSignIn googleSignIn = GoogleSignIn(
           clientId: '366792053793-jnpnkdegi1f27rti468ctde4um88jv1d.apps.googleusercontent.com',
-          scopes: ['email'],
+          scopes: ['openid', 'profile', 'email'],
         );
         
         final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -65,15 +67,16 @@ class AuthService {
         
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
         
-        if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-          debugPrint('Failed to obtain Google authentication tokens (web)');
+        // For web, we can use access token even if idToken is null
+        if (googleAuth.accessToken == null) {
+          debugPrint('Failed to obtain Google access token (web)');
           return null;
         }
         
-        // Create Firebase credential
+        // Create Firebase credential - use access token and handle null idToken
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
-          idToken: googleAuth.idToken,
+          idToken: googleAuth.idToken, // This can be null on web
         );
         
         // Sign in to Firebase
