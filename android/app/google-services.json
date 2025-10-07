@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "366792053793",
+    "project_id": "zoom-classroom-f77fc",
+    "storage_bucket": "zoom-classroom-f77fc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366792053793:android:0b17fff8c2dbe308667f60",
+        "android_client_info": {
+          "package_name": "com.classroom.zoom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366792053793-fvo1lu71dq4tns2v3ertdrok74l4sa3c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.classroom.zoom",
+            "certificate_hash": "427a72f1c68b510b8ab083fea39434d3d0e74aec"
+          }
+        },
+        {
+          "client_id": "366792053793-jnpnkdegi1f27rti468ctde4um88jv1d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKkA3rZhgQE0BoDdoy_gBQjd4jf45wcRI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366792053793-jnpnkdegi1f27rti468ctde4um88jv1d.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "366792053793-0irajambu3mqets7rj89duf9h95ngfs7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.classroom.zoom"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

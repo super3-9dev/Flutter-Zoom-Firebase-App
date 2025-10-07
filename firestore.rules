@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isTeacher() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'teacher';
+    }
+    
+    function isStudent() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student';
+    }
+    
+    function isClassMember(classId) {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/classes/$(classId)).data.studentIds.hasAny([request.auth.uid]) ||
+         get(/databases/$(database)/documents/classes/$(classId)).data.teacherId == request.auth.uid);
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+    
+    // Classes collection
+    match /classes/{classId} {
+      allow read: if isClassMember(classId);
+      allow create: if isTeacher();
+      allow update: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(classId)).data.teacherId == request.auth.uid;
+      allow delete: if isTeacher() && 
+        get(/databases/$(database)/documents/classes/$(classId)).data.teacherId == request.auth.uid;
+    }
+    
+    // Meetings collection
+    match /meetings/{meetingId} {
+      allow read: if isAuthenticated();
+      allow create: if isTeacher();
+      allow update: if isTeacher() && 
+        get(/databases/$(database)/documents/meetings/$(meetingId)).data.teacherId == request.auth.uid;
+      allow delete: if isTeacher() && 
+        get(/databases/$(database)/documents/meetings/$(meetingId)).data.teacherId == request.auth.uid;
+    }
+    
+    // Chat messages collection
+    match /chat_messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        (resource.data.senderId == request.auth.uid || isTeacher());
+      allow delete: if isAuthenticated() && 
+        (resource.data.senderId == request.auth.uid || isTeacher());
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // System messages collection
+    match /system_messages/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isTeacher();
+      allow update: if isTeacher();
+      allow delete: if isTeacher();
+    }
+    
+    // Meeting participants collection
+    match /meeting_participants/{participantId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || isTeacher());
+    }
+    
+    // User preferences collection
+    match /user_preferences/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+    
+    // App settings collection
+    match /app_settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher();
+    }
+    
+    // Default deny rule
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,66 @@
+name: flutter_zoom_classroom
+description: A Flutter app for teachers to create Zoom meetings and communicate with students
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Firebase - Mobile only (web packages cause compatibility issues)
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.7.0
+  firebase_auth_web: ^5.13.0
+  cloud_firestore: ^5.4.3
+  firebase_messaging: ^15.1.0
+  firebase_messaging_web: ^3.6.0
+  
+  # Authentication - Mobile only
+  google_sign_in: ^6.2.1
+  phone_numbers_parser: ^9.0.15
+  
+  # Zoom SDK - Note: This is a placeholder. Use actual Zoom SDK when available
+  # zoom_sdk: ^1.0.0
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # UI & Navigation
+  cupertino_icons: ^1.0.2
+  flutter_svg: ^2.0.9
+  cached_network_image: ^3.3.0
+  
+  # Utilities
+  http: ^1.1.2
+  shared_preferences: ^2.2.2
+  intl: ^0.20.2
+  uuid: ^4.2.1
+  
+  # Notifications - Using compatible versions
+  flutter_local_notifications: ^19.4.2
+  
+  # Permissions - Using compatible versions
+  permission_handler: ^12.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+  
+  # fonts:
+    # - family: Roboto
+    #   fonts:
+    #     - asset: assets/fonts/Roboto-Regular.ttf
+    #     - asset: assets/fonts/Roboto-Bold.ttf
+    #       weight: 700
+
