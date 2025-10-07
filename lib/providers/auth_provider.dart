@@ -54,6 +54,10 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading user model: $e');
+      // If user document doesn't exist, _userModel will be null
+      // This will trigger role selection screen for new users
+      _userModel = null;
+      notifyListeners();
     }
   }
 
@@ -207,6 +211,22 @@ class AuthProvider with ChangeNotifier {
         _setError('Error updating profile: $e');
         _setLoading(false);
       }
+    }
+  }
+
+  /// Create user document in Firestore
+  Future<void> createUserDocument(UserModel userModel) async {
+    try {
+      _setLoading(true);
+      
+      await AuthService.createOrUpdateUserDocument(userModel);
+      
+      _userModel = userModel;
+      _setLoading(false);
+      notifyListeners();
+    } catch (e) {
+      _setError('Error creating user document: $e');
+      _setLoading(false);
     }
   }
 

@@ -11,6 +11,7 @@ import 'screens/splash_screen.dart';
 import 'utils/app_theme.dart';
 import 'services/notification_service.dart';
 import 'services/zoom_service.dart';
+import 'utils/firebase_config_checker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,9 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
     debugPrint('Firebase initialized successfully');
+    
+    // Check Firebase configuration
+    await FirebaseConfigChecker.printStatus();
   } catch (e) {
     debugPrint('Firebase initialization failed: $e');
     // Continue without Firebase for debugging

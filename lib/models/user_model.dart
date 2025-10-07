@@ -1,4 +1,4 @@
-// import 'package:cloud_firestore/cloud_firestore.dart'; // Temporarily disabled for web compatibility
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// User model representing both teachers and students
 class UserModel {
@@ -28,28 +28,32 @@ class UserModel {
     this.createdClassIds = const [],
   });
 
-  /// Create UserModel from Firestore document - Mock implementation
-  factory UserModel.fromFirestore(dynamic doc) {
-    // Mock implementation
+  /// Create UserModel from Firestore document
+  factory UserModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return UserModel(
-      id: 'mock_id',
-      email: 'test@example.com',
-      displayName: 'Test User',
-      role: UserRole.teacher,
-      createdAt: DateTime.now(),
-      lastSeen: DateTime.now(),
-      isOnline: true,
+      id: doc.id,
+      email: data['email'] ?? '',
+      phoneNumber: data['phoneNumber'],
+      displayName: data['displayName'] ?? 'User',
+      photoUrl: data['photoUrl'],
+      role: UserRole.fromString(data['role'] ?? 'student'),
+      createdAt: DateTime.parse(data['createdAt'] ?? DateTime.now().toIso8601String()),
+      lastSeen: DateTime.parse(data['lastSeen'] ?? DateTime.now().toIso8601String()),
+      isOnline: data['isOnline'] ?? false,
+      classIds: List<String>.from(data['enrolledClassIds'] ?? []),
+      createdClassIds: List<String>.from(data['createdClassIds'] ?? []),
     );
   }
 
-  /// Convert UserModel to Firestore document - Mock implementation
+  /// Convert UserModel to Firestore document
   Map<String, dynamic> toFirestore() {
     return {
       'email': email,
       'phoneNumber': phoneNumber,
       'displayName': displayName,
       'photoUrl': photoUrl,
-      'role': role.toString().split('.').last,
+      'role': role.toString(),
       'createdAt': createdAt.toIso8601String(),
       'lastSeen': lastSeen.toIso8601String(),
       'isOnline': isOnline,

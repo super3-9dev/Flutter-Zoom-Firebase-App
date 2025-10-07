@@ -288,6 +288,21 @@ class AuthService {
     }
   }
 
+  /// Create or update user document in Firestore (Public method)
+  static Future<void> createOrUpdateUserDocument(UserModel userModel) async {
+    try {
+      if (_firestore != null) {
+        await _firestore!.collection('users')
+            .doc(userModel.id)
+            .set(userModel.toFirestore(), SetOptions(merge: true));
+        debugPrint('User document created/updated successfully');
+      }
+    } catch (e) {
+      debugPrint('Error creating/updating user document: $e');
+      rethrow;
+    }
+  }
+
   /// Create or update user document in Firestore (Web version)
   static Future<void> _createOrUpdateUserDocumentWeb(User firebaseUser) async {
     try {
@@ -345,12 +360,6 @@ class AuthService {
 
   /// Get user document from Firestore
   static Future<UserModel?> getUserDocument(String userId) async {
-    if (kIsWeb) {
-      // Mock implementation for web
-      await Future.delayed(const Duration(seconds: 1));
-      return null;
-    }
-    
     try {
       if (_firestore == null) {
         debugPrint('Firestore not available');
@@ -360,6 +369,7 @@ class AuthService {
       if (doc.exists) {
         return UserModel.fromFirestore(doc);
       }
+      debugPrint('User document does not exist for userId: $userId');
       return null;
     } catch (e) {
       debugPrint('Error getting user document: $e');

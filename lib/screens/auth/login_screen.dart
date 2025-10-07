@@ -7,6 +7,7 @@ import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
 import '../home/home_screen.dart';
 import 'phone_verification_screen.dart';
+import 'role_selection_screen.dart';
 
 /// Login screen with Google and phone number authentication options
 class LoginScreen extends StatefulWidget {
@@ -34,9 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // Listen to authentication state changes and navigate when authenticated
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (authProvider.isAuthenticated && mounted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
+            _handleAuthenticatedUser(authProvider);
           }
         });
 
@@ -377,6 +376,27 @@ class _LoginScreenState extends State<LoginScreen> {
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
+      );
+    }
+  }
+
+  void _handleAuthenticatedUser(AuthProvider authProvider) {
+    if (authProvider.userModel == null) {
+      // New user - navigate to role selection
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => RoleSelectionScreen(
+            email: authProvider.firebaseUser?.email ?? '',
+            displayName: authProvider.firebaseUser?.displayName ?? 'User',
+            photoUrl: authProvider.firebaseUser?.photoURL,
+            phoneNumber: authProvider.firebaseUser?.phoneNumber,
+          ),
+        ),
+      );
+    } else {
+      // Existing user - navigate to home
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     }
   }
