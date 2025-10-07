@@ -5,6 +5,7 @@ import '../../providers/auth_provider.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/custom_button.dart';
 import '../../widgets/custom_text_field.dart';
+import '../home/home_screen.dart';
 import 'phone_verification_screen.dart';
 
 /// Login screen with Google and phone number authentication options
@@ -28,15 +29,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        // Listen to authentication state changes and navigate when authenticated
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (authProvider.isAuthenticated && mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
+        });
+
+        return Scaffold(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                 const SizedBox(height: 60),
                 
                 // App Logo and Title
@@ -73,11 +85,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 _buildTermsText(),
                 
                 const SizedBox(height: 20),
-              ],
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -236,18 +250,58 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildGoogleButton() {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        return CustomButton(
-          text: 'Continue with Google',
-          onPressed: authProvider.isLoading
-              ? null
-              : () => _handleGoogleSignIn(authProvider),
-          isLoading: authProvider.isLoading,
-          icon: Icons.g_mobiledata,
-          backgroundColor: Colors.white,
-          textColor: AppTheme.textPrimaryColor,
-          borderColor: AppTheme.textHintColor.withOpacity(0.3),
+        final isEnabled = !authProvider.isLoading;
+        
+        return SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: isEnabled ? () => _handleGoogleSignIn(authProvider) : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: AppTheme.textPrimaryColor,
+              elevation: isEnabled ? 2 : 0,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: AppTheme.textHintColor.withOpacity(0.3)),
+              ),
+            ),
+            child: authProvider.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildGoogleIcon(),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Continue with Google',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppTheme.textPrimaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildGoogleIcon() {
+    return Container(
+      width: 20,
+      height: 20,
+      child: Image.asset(
+        'assets/icons/google.png',
+        fit: BoxFit.contain,
+      ),
     );
   }
 
@@ -292,8 +346,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleGoogleSignIn(AuthProvider authProvider) async {
     final success = await authProvider.signInWithGoogle();
-    if (!success && mounted) {
-      _showErrorSnackBar(authProvider.error ?? 'Google sign-in failed');
+    if (mounted) {
+      if (success) {
+        _showSuccessToast('Welcome! Sign-in successful');
+        // Navigation will be handled by AuthProvider state changes
+      } else {
+        _showErrorSnackBar(authProvider.error ?? 'Google sign-in failed');
+      }
     }
   }
 
@@ -304,6 +363,19 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text(message),
           backgroundColor: AppTheme.errorColor,
           behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _showSuccessToast(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
         ),
       );
     }
